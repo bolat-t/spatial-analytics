@@ -1,0 +1,20 @@
+# Python-generated files
+__pycache__/
+*.py[oc]
+build/
+dist/
+wheels/
+*.egg-info
+
+# Virtual environments
+.venv
+
+# Data artifacts — reproducible from the ingest scripts, and large
+data/
+*.duckdb
+*.duckdb.wal
+
+# OS / editor cruft
+.DS_Store
+.idea/
+.vscode/

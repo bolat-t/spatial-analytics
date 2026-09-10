@@ -1,0 +1,17 @@
+[project]
+name = "spatial-analytics"
+version = "0.1.0"
+description = "NSW bushfire exposure — which homes sit in the fire interface, and who lives in them (NPWS fire history + G-NAF + ABS SA1 -> DuckDB spatial -> deck.gl)"
+readme = "README.md"
+requires-python = ">=3.12"
+dependencies = [
+    "duckdb>=1.5.3",
+    "httpx>=0.28.1",
+    "geopandas>=1.0.1",
+    "pyarrow>=18.0.0",
+    "shapely>=2.0.6",
+]
+
+[build-system]
+requires = ["uv_build>=0.11.6,<0.12.0"]
+build-backend = "uv_build"
