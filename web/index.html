@@ -12,7 +12,7 @@
   html,body { margin:0; height:100%; background:var(--bg); color:var(--ink);
     font:14px/1.45 -apple-system, "Inter", system-ui, sans-serif; }
   #map { position:absolute; inset:0; }
-  #panel { position:absolute; top:16px; left:16px; width:340px; max-height:calc(100% - 32px);
+  #panel { position:absolute; z-index:10; top:16px; left:16px; width:340px; max-height:calc(100% - 32px);
     overflow:auto; background:var(--panel); backdrop-filter:blur(8px); border:1px solid var(--rule);
     border-radius:6px; padding:18px 20px; box-sizing:border-box; }
   h1 { font-size:17px; font-weight:600; margin:0 0 4px; letter-spacing:-.01em; }
@@ -34,7 +34,7 @@
   .top b { font-weight:500; }
   .top em { font-style:normal; color:var(--mid); white-space:nowrap; }
   .note { font-size:11.5px; color:var(--mid); margin-top:12px; }
-  #tip { position:absolute; pointer-events:none; background:var(--panel); border:1px solid var(--rule);
+  #tip { position:absolute; z-index:11; pointer-events:none; background:var(--panel); border:1px solid var(--rule);
     padding:8px 10px; border-radius:4px; font-size:12px; display:none; max-width:240px; }
   #tip b { font-weight:600; }
   #loading { position:absolute; inset:0; display:grid; place-items:center; color:var(--mid); font-size:13px; }
