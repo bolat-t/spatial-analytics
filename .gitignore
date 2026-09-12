@@ -10,7 +10,7 @@ wheels/
 .venv
 
 # Data artifacts — reproducible from the ingest scripts, and large
-data/
+/data/
 *.duckdb
 *.duckdb.wal
 

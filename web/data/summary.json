@@ -1,0 +1,155 @@
+{
+ "bands": [
+  {
+   "within_m": 0,
+   "homes": 92846,
+   "farms": 16651,
+   "persons": 192006,
+   "aged_65_plus": 35242,
+   "under_15": 37197
+  },
+  {
+   "within_m": 100,
+   "homes": 165304,
+   "farms": 20182,
+   "persons": 331622,
+   "aged_65_plus": 65176,
+   "under_15": 63048
+  },
+  {
+   "within_m": 500,
+   "homes": 480649,
+   "farms": 33570,
+   "persons": 939219,
+   "aged_65_plus": 192381,
+   "under_15": 176798
+  },
+  {
+   "within_m": 1000,
+   "homes": 871497,
+   "farms": 49402,
+   "persons": 1675988,
+   "aged_65_plus": 336594,
+   "under_15": 314917
+  }
+ ],
+ "top_sa2": [
+  {
+   "sa2": "Springwood - Winmalee",
+   "sa4": "Sydney - Outer West and Blue Mountains",
+   "homes": 7369,
+   "persons": 17076,
+   "pct_of_homes": 75.6
+  },
+  {
+   "sa2": "Glenmore Park - Regentville",
+   "sa4": "Sydney - Outer West and Blue Mountains",
+   "homes": 5134,
+   "persons": 14055,
+   "pct_of_homes": 66.8
+  },
+  {
+   "sa2": "Lawson - Hazelbrook - Linden",
+   "sa4": "Sydney - Outer West and Blue Mountains",
+   "homes": 5520,
+   "persons": 10472,
+   "pct_of_homes": 90.9
+  },
+  {
+   "sa2": "Williamtown - Medowie - Karuah",
+   "sa4": "Hunter Valley exc Newcastle",
+   "homes": 4911,
+   "persons": 10419,
+   "pct_of_homes": 75.2
+  },
+  {
+   "sa2": "Blaxland - Warrimoo - Lapstone",
+   "sa4": "Sydney - Outer West and Blue Mountains",
+   "homes": 3195,
+   "persons": 7541,
+   "pct_of_homes": 40.1
+  },
+  {
+   "sa2": "Kingscliff - Fingal Head",
+   "sa4": "Richmond - Tweed",
+   "homes": 4021,
+   "persons": 6802,
+   "pct_of_homes": 38.4
+  },
+  {
+   "sa2": "Googong",
+   "sa4": "Capital Region",
+   "homes": 3944,
+   "persons": 6223,
+   "pct_of_homes": 100.0
+  },
+  {
+   "sa2": "Berowra - Brooklyn - Cowan",
+   "sa4": "Sydney - North Sydney and Hornsby",
+   "homes": 2270,
+   "persons": 5718,
+   "pct_of_homes": 48.3
+  },
+  {
+   "sa2": "Bega - Tathra",
+   "sa4": "Capital Region",
+   "homes": 3468,
+   "persons": 5479,
+   "pct_of_homes": 72.6
+  },
+  {
+   "sa2": "Nowra",
+   "sa4": "Southern Highlands and Shoalhaven",
+   "homes": 1922,
+   "persons": 5319,
+   "pct_of_homes": 18.2
+  },
+  {
+   "sa2": "Mulgoa - Luddenham - Orchard Hills",
+   "sa4": "Sydney - Outer West and Blue Mountains",
+   "homes": 2447,
+   "persons": 5292,
+   "pct_of_homes": 56.7
+  },
+  {
+   "sa2": "Batemans Bay - South",
+   "sa4": "Capital Region",
+   "homes": 4418,
+   "persons": 5108,
+   "pct_of_homes": 52.1
+  },
+  {
+   "sa2": "Kariong",
+   "sa4": "Central Coast",
+   "homes": 1911,
+   "persons": 5012,
+   "pct_of_homes": 77.4
+  },
+  {
+   "sa2": "Katoomba - Leura",
+   "sa4": "Sydney - Outer West and Blue Mountains",
+   "homes": 4069,
+   "persons": 5001,
+   "pct_of_homes": 39.9
+  },
+  {
+   "sa2": "Queanbeyan West - Jerrabomberra",
+   "sa4": "Capital Region",
+   "homes": 1971,
+   "persons": 4983,
+   "pct_of_homes": 36.9
+  }
+ ],
+ "gccsa": [
+  {
+   "name": "Greater Sydney",
+   "homes": 86132,
+   "persons": 187988
+  },
+  {
+   "name": "Rest of NSW",
+   "homes": 79172,
+   "persons": 143634
+  }
+ ]
+}
