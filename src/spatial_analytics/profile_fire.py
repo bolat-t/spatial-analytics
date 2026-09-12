@@ -38,7 +38,8 @@ QUERIES: list[tuple[str, str]] = [
     (
         "FireYear encoding",
         """
-        select case when FireYear < 10000 then '4-digit (malformed)'
+        select case when FireYear is null then 'null'
+                    when FireYear < 10000 then '4-digit (malformed)'
                     else '6-digit financial year' end as format,
                count(*) as n, min(FireYear) as min, max(FireYear) as max
         from fire_raw group by 1 order by n
