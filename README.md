@@ -14,7 +14,7 @@ layer tells you which one you are looking at.
 
 ## Status
 
-Pipeline runs end to end; the map is next.
+Pipeline runs end to end, map included. Next: portfolio write-up, GitHub Pages deploy.
 
 | Stage | State |
 |---|---|
@@ -25,7 +25,7 @@ Pipeline runs end to end; the map is next.
 | Point-in-buffer join → `address_exposure` | ✅ `build_exposure` — 6.6 M hits, ~50 s |
 | ABS mesh blocks + census → `census_sa1` | ✅ `ingest_abs` |
 | Dwelling-weighted overlay → `sa1_exposure` | ✅ `build_population` |
-| deck.gl map | ⬜ |
+| deck.gl map | ✅ `export_map` → `web/` — serve with `python3 -m http.server --directory web` |
 
 ## First results
 
@@ -160,4 +160,5 @@ uv run python -m spatial_analytics.ingest_gnaf       # after extracting the NSW 
 uv run python -m spatial_analytics.build_exposure    # addresses x fires x bands
 uv run python -m spatial_analytics.ingest_abs        # mesh blocks + census
 uv run python -m spatial_analytics.build_population  # people, by age, by SA1
+uv run python -m spatial_analytics.export_map        # web/data/*.json for the map
 ```
