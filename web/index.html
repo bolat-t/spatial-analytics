@@ -76,10 +76,18 @@ const on = {pt0:true, pt100:true, e2019:true, e2000:true, e1900:true};
 const ERA = {'2019 onward':'e2019','2000–2018':'e2000','before 2000':'e1900'};
 const ERA_FILL = {'2019 onward':[255,77,61,110],'2000–2018':[255,160,64,80],'before 2000':[160,140,120,70]};
 
+// #lon,lat,zoom in the URL sets the view, so a view can be linked to.
+const hash = location.hash.slice(1).split(',').map(Number);
+const view = hash.length === 3 && hash.every(Number.isFinite)
+  ? {center:[hash[0], hash[1]], zoom:hash[2]} : {center:[150.55,-33.75], zoom:8.2};
 const map = new maplibregl.Map({
   container:'map',
   style:'https://basemaps.cartocdn.com/gl/dark-matter-gl-style/style.json',
-  center:[150.55,-33.75], zoom:8.2, minZoom:5, maxZoom:16, attributionControl:true
+  ...view, minZoom:5, maxZoom:16, attributionControl:true
+});
+map.on('moveend', () => {
+  const c = map.getCenter();
+  history.replaceState(null, '', `#${c.lng.toFixed(4)},${c.lat.toFixed(4)},${map.getZoom().toFixed(2)}`);
 });
 map.addControl(new maplibregl.NavigationControl({showCompass:false}), 'top-right');
 const overlay = new MapboxOverlay({interleaved:false, layers:[]});
