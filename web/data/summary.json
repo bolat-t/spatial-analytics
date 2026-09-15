@@ -1,4 +1,97 @@
 {
+ "nsw_homes": 4190354,
+ "burnt_by_decade": [
+  {
+   "decade": 1900,
+   "million_ha": 0.0
+  },
+  {
+   "decade": 1920,
+   "million_ha": 0.0
+  },
+  {
+   "decade": 1930,
+   "million_ha": 3.63
+  },
+  {
+   "decade": 1940,
+   "million_ha": 0.05
+  },
+  {
+   "decade": 1950,
+   "million_ha": 1.15
+  },
+  {
+   "decade": 1960,
+   "million_ha": 1.25
+  },
+  {
+   "decade": 1970,
+   "million_ha": 5.09
+  },
+  {
+   "decade": 1980,
+   "million_ha": 4.37
+  },
+  {
+   "decade": 1990,
+   "million_ha": 2.41
+  },
+  {
+   "decade": 2000,
+   "million_ha": 5.55
+  },
+  {
+   "decade": 2010,
+   "million_ha": 6.92
+  },
+  {
+   "decade": 2020,
+   "million_ha": 0.54
+  }
+ ],
+ "first_exposed_by_decade": [
+  {
+   "decade": 1930,
+   "homes": 1480
+  },
+  {
+   "decade": 1940,
+   "homes": 1507
+  },
+  {
+   "decade": 1950,
+   "homes": 15927
+  },
+  {
+   "decade": 1960,
+   "homes": 17218
+  },
+  {
+   "decade": 1970,
+   "homes": 24449
+  },
+  {
+   "decade": 1980,
+   "homes": 25933
+  },
+  {
+   "decade": 1990,
+   "homes": 35056
+  },
+  {
+   "decade": 2000,
+   "homes": 30104
+  },
+  {
+   "decade": 2010,
+   "homes": 12633
+  },
+  {
+   "decade": 2020,
+   "homes": 997
+  }
+ ],
  "bands": [
   {
    "within_m": 0,

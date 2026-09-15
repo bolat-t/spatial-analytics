@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>NSW bushfires, 1902–2026, and who lives there now</title>
+<title>NSW bushfires, over time</title>
 <link rel="stylesheet" href="https://unpkg.com/maplibre-gl@4.7.1/dist/maplibre-gl.css">
 <script src="https://unpkg.com/maplibre-gl@4.7.1/dist/maplibre-gl.js"></script>
 <script src="https://unpkg.com/deck.gl@9.0.35/dist.min.js"></script>
@@ -13,18 +13,27 @@
   #map { position:absolute; inset:0; }
   #panel { position:absolute; z-index:10; top:20px; left:20px; width:320px; max-height:calc(100% - 40px); overflow:auto;
     background:var(--panel); backdrop-filter:blur(8px); border:1px solid var(--rule); border-radius:6px; padding:20px 22px 16px; box-sizing:border-box; }
-  .title { font-size:13px; color:var(--mid); margin-bottom:14px; line-height:1.4; }
-  .year { font-size:54px; font-weight:600; letter-spacing:-.03em; line-height:1; font-variant-numeric:tabular-nums; }
-  .big { font-size:30px; font-weight:600; letter-spacing:-.02em; line-height:1.1; margin-top:14px; font-variant-numeric:tabular-nums; }
-  .lede { font-size:14px; margin-top:6px; line-height:1.35; color:var(--ink); }
-  .lede b { font-weight:500; }
-  .sub { font-size:12px; color:var(--mid); margin-top:4px; min-height:1.2em; }
+  .h1 { font-size:19px; font-weight:600; letter-spacing:-.01em; }
+  .intro { font-size:13px; color:var(--mid); margin:6px 0 20px; line-height:1.45; }
+  .intro b { color:var(--ink); font-weight:500; }
+  .label { font:11px ui-monospace, Menlo, monospace; text-transform:uppercase; letter-spacing:.08em; color:var(--mid); }
+  .big { font-size:34px; font-weight:600; letter-spacing:-.02em; line-height:1.1; margin-top:4px; font-variant-numeric:tabular-nums; }
+  .lede { font-size:13.5px; margin-top:6px; line-height:1.35; color:var(--mid); }
+  .lede b { color:var(--ink); font-weight:500; }
+  .pct { font-size:12.5px; color:var(--mid); margin-top:6px; font-variant-numeric:tabular-nums; }
+  .pct b { color:var(--ink); font-weight:600; }
   .time { display:grid; grid-template-columns:auto 1fr; gap:12px; align-items:center; margin-top:18px; }
   button.play { width:36px; height:36px; border-radius:50%; border:1px solid var(--rule); background:transparent; color:var(--ink); cursor:pointer; font-size:14px; display:grid; place-items:center; }
   button.play:hover { border-color:var(--ink); }
   input[type=range] { width:100%; accent-color:var(--accent); }
   .ticks { display:flex; justify-content:space-between; font:10px ui-monospace, Menlo, monospace; color:var(--mid); margin-top:2px; grid-column:2; }
   .legend { display:grid; gap:6px; font-size:12px; margin:18px 0 4px; }
+  .chart { margin-top:18px; border-top:1px solid var(--rule); padding-top:12px; }
+  .chart-title { font-size:12px; margin-bottom:6px; }
+  .chart-title em { font-style:normal; color:var(--mid); margin-left:6px; }
+  #decades { width:100%; height:auto; display:block; }
+  .insight { font-size:12.5px; line-height:1.5; margin:12px 0 0; color:var(--mid); }
+  .insight b { color:var(--ink); font-weight:600; }
   .legend span { display:inline-flex; align-items:center; gap:8px; }
   .legend i { width:11px; height:11px; border-radius:2px; display:inline-block; flex:none; }
   details { margin-top:16px; border-top:1px solid var(--rule); padding-top:12px; }
@@ -51,28 +60,39 @@
 <div id="map"></div>
 <div id="loading">loading…</div>
 <div id="panel">
-  <div class="title">Where NSW has burnt since 1902 — and who lives there now.</div>
-  <div class="year" id="yr">1902</div>
-  <div class="big" id="n">0</div>
-  <div class="lede">of today's homes sit within 100 m of ground that had burnt by then</div>
+  <div class="h1">NSW bushfires, over time</div>
+  <div class="intro">This map shows <b>where fires have occurred since 1902</b> and how those fire areas overlap with <b>homes that exist in NSW today</b>.</div>
+
+  <div class="label">Fires recorded by <span id="yr">1902</span></div>
+  <div class="big"><span id="n">0</span> homes today</div>
+  <div class="lede">were located <b>within 100 m of land that had burnt by <span id="yr2">1902</span></b></div>
+  <div class="pct" id="pct"></div>
+
   <div class="time">
     <button class="play" id="play" title="play">▶</button>
     <input type="range" id="slider" min="1902" max="2026" value="1902" step="1">
     <div class="ticks"><span>1902</span><span>1950</span><span>2000</span><span>2026</span></div>
   </div>
+
   <div class="legend">
-    <span><i style="background:rgba(255,77,61,.7)"></i>burnt in the last 5 years</span>
-    <span><i style="background:rgba(255,160,64,.5)"></i>burnt 5–30 years ago</span>
-    <span><i style="background:rgba(160,140,120,.45)"></i>burnt longer ago</span>
-    <span><i style="background:#ff4d3d;border-radius:50%"></i>home inside a fire footprint</span>
-    <span><i style="background:#ffa040;border-radius:50%"></i>home within 100 m of one</span>
+    <span><i style="background:rgba(255,77,61,.75)"></i>Burnt in the last 5 years</span>
+    <span><i style="background:rgba(255,160,64,.55)"></i>Burnt 5–30 years ago</span>
+    <span><i style="background:rgba(160,140,120,.5)"></i>Burnt more than 30 years ago</span>
+    <span><i style="background:#ffb054;border-radius:50%"></i>Today's home within 100 m of burnt land</span>
   </div>
+
+  <div class="chart">
+    <div class="chart-title">Land burnt each decade <em>million hectares</em></div>
+    <svg id="decades" viewBox="0 0 276 62"></svg>
+  </div>
+  <p class="insight">The 2010s burnt <b>6.9 million hectares</b>, the most of any decade on record, most of it in the 2019–20 season — consistent with hotter, drier fire seasons. Yet by 2009, <b>92%</b> of the homes beside burnt land today had already been exposed. The fire edge is not new; the homes built along it are.</p>
+
   <details>
     <summary>today, by distance and suburb</summary>
     <table id="bands"><thead><tr><th>within</th><th>homes</th><th>people</th><th>65+</th></tr></thead><tbody></tbody></table>
     <div class="sec">most exposed suburbs</div>
     <div class="top"><ol id="top"></ol></div>
-    <p class="note">120 years of NPWS fire history (wildfires only) against every residential address in G-NAF and the 2021 census. A home appears the year the ground within 100 m of it first burnt; the homes are today's, not the ones that stood then. People are scaled by each area's exposed share of addresses. <a href="https://github.com/bolat-t/spatial-analytics">Method and data notes</a>.</p>
+    <p class="note">120 years of NPWS fire history (wildfires only) against every residential address in G-NAF and the 2021 census. A home appears the year the ground within 100 m of it first burnt; the homes are today's, not the ones that stood then. Early decades are under-recorded, so the chart understates them. People are scaled by each area's exposed share of addresses. <a href="https://github.com/bolat-t/spatial-analytics">Method and data notes</a>.</p>
   </details>
 </div>
 <div id="tip"></div>
@@ -103,7 +123,7 @@ function layers(){
     new GeoJsonLayer({ id:'fires', data:{type:'FeatureCollection', features: fires.features.filter(f => f.properties.from <= year)},
       stroked:false, filled:true, getFillColor: fireColor, updateTriggers:{getFillColor:[year]}, transitions:{getFillColor:600} }),
     new ScatterplotLayer({ id:'homes', data:homes,
-      getPosition: d => [d[0], d[1]], getFillColor: d => d[2]===0 ? [255,77,61] : [255,160,64],
+      getPosition: d => [d[0], d[1]], getFillColor: [255,176,84],
       getRadius: d => d[6] ? 14 : 22, radiusMinPixels:1.3, radiusMaxPixels:6, radiusUnits:'meters', opacity:.9, pickable:true,
       getFilterValue: d => d[7], filterRange:[0, year], extensions:[new DataFilterExtension({filterSize:1})],
       onHover: ({object, x, y}) => {
@@ -115,12 +135,28 @@ function layers(){
   ];
 }
 function countBy(y){ let lo=0, hi=firstYears.length; while(lo<hi){ const m=(lo+hi)>>1; if(firstYears[m]<=y) lo=m+1; else hi=m; } return lo; }
+let nswHomes = 0, decades = [];
 function setYear(y, fromSlider){
   year = Math.max(Y0, Math.min(Y1, y));
-  document.getElementById('yr').textContent = year;
-  document.getElementById('n').textContent = fmt(countBy(year));
+  const n = countBy(year);
+  document.getElementById('yr').textContent = year; document.getElementById('yr2').textContent = year;
+  document.getElementById('n').textContent = fmt(n);
+  document.getElementById('pct').innerHTML = nswHomes ? `<b>${(100*n/nswHomes).toFixed(1)}%</b> of the ${(nswHomes/1e6).toFixed(1)} million homes in NSW · <b>${Math.round(100*n/firstYears.length)}%</b> of those exposed today` : '';
   if(!fromSlider) document.getElementById('slider').value = year;
+  drawDecades();
   overlay.setProps({layers: layers()});
+}
+function drawDecades(){
+  const svg = document.getElementById('decades'); if(!decades.length) return;
+  const W=276, H=62, pad=2, bw=(W-2*pad)/decades.length, max=Math.max(...decades.map(d=>d.million_ha));
+  const cur = Math.floor(year/10)*10;
+  svg.innerHTML = decades.map((d,i) => {
+    const h = Math.max(1, (H-16) * d.million_ha / max), x = pad + i*bw, on = d.decade <= cur, now = d.decade === cur;
+    const fill = now ? '#ff4d3d' : on ? 'rgba(236,230,218,.55)' : 'rgba(236,230,218,.14)';
+    return `<rect x="${x+1}" y="${H-16-h}" width="${bw-2}" height="${h}" fill="${fill}" rx="1"/>` +
+      (i%3===0 ? `<text x="${x+bw/2}" y="${H-3}" text-anchor="middle" font-size="8" font-family="ui-monospace, Menlo, monospace" fill="#a29b8f">${String(d.decade).slice(2)}s</text>` : '') +
+      (now ? `<text x="${x+bw/2}" y="${H-16-h-3}" text-anchor="middle" font-size="9" font-family="ui-monospace, Menlo, monospace" fill="#ece6da">${d.million_ha}</text>` : '');
+  }).join('');
 }
 function play(){
   playing = !playing; document.getElementById('play').textContent = playing ? '❚❚' : '▶';
@@ -130,11 +166,11 @@ function play(){
 document.getElementById('play').onclick = play;
 document.getElementById('slider').oninput = e => { if(playing) play(); setYear(+e.target.value, true); };
 
-const V = '?v=20260915';   // bump when data/ changes, or returning visitors get the old files
+const V = '?v=20260915b';   // bump when data/ changes, or returning visitors get the old files
 Promise.all([
   fetch('data/fires.geojson'+V).then(r=>r.json()), fetch('data/homes.json'+V).then(r=>r.json()), fetch('data/summary.json'+V).then(r=>r.json()),
 ]).then(([f, h, s]) => {
-  fires = f; homes = h.pts; sa2 = h.sa2;
+  fires = f; homes = h.pts; sa2 = h.sa2; nswHomes = s.nsw_homes; decades = s.burnt_by_decade.filter(d => d.decade >= 1900);
   firstYears = homes.filter(p => !p[6]).map(p => p[7]).sort((a,b)=>a-b);   // homes only, not farms
   document.querySelector('#bands tbody').innerHTML = s.bands.map(b => `<tr><td>${b.within_m===0?'footprint':b.within_m+' m'}</td><td>${fmt(b.homes)}</td><td>${fmt(b.persons)}</td><td>${fmt(b.aged_65_plus)}</td></tr>`).join('');
   document.getElementById('top').innerHTML = s.top_sa2.slice(0,8).map(t => `<li><b>${t.sa2}</b><em>${fmt(t.homes)} homes · ${t.pct_of_homes}%</em></li>`).join('');

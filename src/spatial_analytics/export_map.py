@@ -115,8 +115,28 @@ def export_summary(con) -> None:
         where s.band_m = 100 group by 1 order by 3 desc
         """
     ).fetchall()
+    # Two series per decade for the panel's chart: how much of NSW burnt, and
+    # how many of today's homes first came within 100 m of burnt ground.
+    burnt = con.execute(
+        """
+        select (season_start_year // 10) * 10 as decade, round(sum(st_area(geom)) / 1e10, 2) as million_ha
+        from fire where fire_type_code = 1 and season_start_year is not null group by 1 order by 1
+        """
+    ).fetchall()
+    first = con.execute(
+        """
+        with f as (select address_pid, min(season_start_year) as y from exposure_pairs
+                   where band_m <= 100 and season_start_year is not null group by 1)
+        select (y // 10) * 10 as decade, count(*)::int
+        from f join address_home using (address_pid) where is_residential group by 1 order by 1
+        """
+    ).fetchall()
+    nsw_homes = con.execute("select count(*) from address_home where is_residential").fetchone()[0]
     out = WEB_DATA / "summary.json"
     out.write_text(json.dumps({
+        "nsw_homes": nsw_homes,
+        "burnt_by_decade": [{"decade": int(d), "million_ha": m} for d, m in burnt],
+        "first_exposed_by_decade": [{"decade": int(d), "homes": n} for d, n in first],
         "bands": [dict(zip(("within_m", "homes", "farms", "persons", "aged_65_plus", "under_15"), r)) for r in bands],
         "top_sa2": [dict(zip(("sa2", "sa4", "homes", "persons", "pct_of_homes"), r)) for r in top],
         "gccsa": [dict(zip(("name", "homes", "persons"), r)) for r in gccsa],
