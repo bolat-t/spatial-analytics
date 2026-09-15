@@ -12,48 +12,48 @@
   html,body { margin:0; height:100%; background:var(--bg); color:var(--ink);
     font:14px/1.45 -apple-system, "Inter", system-ui, sans-serif; }
   #map { position:absolute; inset:0; }
-  #panel { position:absolute; z-index:10; top:16px; left:16px; width:340px; max-height:calc(100% - 32px);
+  #panel { position:absolute; z-index:10; top:20px; left:20px; width:300px; max-height:calc(100% - 40px);
     overflow:auto; background:var(--panel); backdrop-filter:blur(8px); border:1px solid var(--rule);
-    border-radius:6px; padding:18px 20px; box-sizing:border-box; }
-  h1 { font-size:17px; font-weight:600; margin:0 0 4px; letter-spacing:-.01em; }
-  .sub { color:var(--mid); font-size:12.5px; margin:0 0 14px; }
-  .big { font-size:30px; font-weight:600; letter-spacing:-.02em; line-height:1.05; margin:10px 0 2px; }
-  .big small { font-size:13px; font-weight:400; color:var(--mid); letter-spacing:0; margin-left:6px; }
-  table { width:100%; border-collapse:collapse; font-size:12.5px; margin:10px 0 4px; font-variant-numeric:tabular-nums; }
+    border-radius:6px; padding:22px 22px 18px; box-sizing:border-box; }
+  .big { font-size:46px; font-weight:600; letter-spacing:-.03em; line-height:1; }
+  .lede { font-size:15px; margin-top:8px; line-height:1.35; }
+  .sub { font-size:12.5px; color:var(--mid); margin-top:6px; }
+  .legend { display:grid; gap:7px; font-size:12px; margin:20px 0 4px; }
+  .legend span { display:inline-flex; align-items:center; gap:8px; cursor:pointer; user-select:none; }
+  .legend i { width:11px; height:11px; border-radius:2px; display:inline-block; flex:none; }
+  .legend .off { opacity:.35; }
+  details { margin-top:18px; border-top:1px solid var(--rule); padding-top:12px; }
+  summary { font:11px ui-monospace, Menlo, monospace; text-transform:uppercase; letter-spacing:.08em; color:var(--mid); cursor:pointer; list-style:none; }
+  summary::-webkit-details-marker { display:none; }
+  summary::before { content:"+ "; }
+  details[open] summary::before { content:"− "; }
+  table { width:100%; border-collapse:collapse; font-size:12.5px; margin:12px 0 4px; font-variant-numeric:tabular-nums; }
   th { text-align:right; font-weight:500; color:var(--mid); padding:4px 0; border-bottom:1px solid var(--rule); }
   th:first-child, td:first-child { text-align:left; }
   td { text-align:right; padding:4px 0; border-bottom:1px solid var(--rule); }
   tr:last-child td { border-bottom:none; }
-  .legend { display:flex; flex-wrap:wrap; gap:6px 14px; font-size:12px; margin:12px 0 4px; }
-  .legend span { display:inline-flex; align-items:center; gap:6px; cursor:pointer; user-select:none; }
-  .legend i { width:12px; height:12px; border-radius:2px; display:inline-block; }
-  .legend .off { opacity:.35; }
   .sec { font-size:11px; text-transform:uppercase; letter-spacing:.08em; color:var(--mid); margin:16px 0 2px; }
   .top li { display:flex; justify-content:space-between; gap:8px; font-size:12.5px; padding:3px 0; border-bottom:1px solid var(--rule); }
   .top ol { margin:6px 0 0; padding:0 0 0 18px; }
   .top b { font-weight:500; }
   .top em { font-style:normal; color:var(--mid); white-space:nowrap; }
-  .note { font-size:11.5px; color:var(--mid); margin-top:12px; }
+  .note { font-size:11.5px; color:var(--mid); margin-top:12px; line-height:1.45; }
+  .note a { color:inherit; }
   #tip { position:absolute; z-index:11; pointer-events:none; background:var(--panel); border:1px solid var(--rule);
     padding:8px 10px; border-radius:4px; font-size:12px; display:none; max-width:240px; }
   #tip b { font-weight:600; }
   #loading { position:absolute; inset:0; display:grid; place-items:center; color:var(--mid); font-size:13px; }
-  @media (max-width:640px) { #panel { width:calc(100% - 32px); max-height:45%; } }
+  @media (max-width:640px) { #panel { width:calc(100% - 40px); max-height:52%; } .big { font-size:38px; } }
 </style>
 </head>
 <body>
 <div id="map"></div>
-<div id="loading">loading 185,000 homes…</div>
+<div id="loading">loading…</div>
 <div id="panel">
-  <h1>NSW homes in the bushfire interface</h1>
-  <p class="sub">Every residential address within 100 m of a mapped wildfire, over 120 years of NPWS fire history.</p>
-  <div class="big" id="h-homes">—<small>homes within 100 m</small></div>
-  <div class="big" id="h-people">—<small>people, ~<span id="h-65"></span> of them over 65</small></div>
+  <div class="big" id="h-homes">—</div>
+  <div class="lede">homes in NSW within 100 m of a mapped bushfire</div>
+  <div class="sub" id="h-people"></div>
 
-  <div class="sec">By interface width</div>
-  <table id="bands"><thead><tr><th>within</th><th>homes</th><th>people</th><th>65+</th></tr></thead><tbody></tbody></table>
-
-  <div class="sec">Layers</div>
   <div class="legend" id="legend">
     <span data-l="pt0"><i style="background:#ff4d3d"></i>home inside a fire footprint</span>
     <span data-l="pt100"><i style="background:#ffa040"></i>home within 100 m</span>
@@ -62,10 +62,13 @@
     <span data-l="e1900"><i style="background:rgba(160,140,120,.4)"></i>burnt before 2000</span>
   </div>
 
-  <div class="sec">Most exposed suburbs</div>
-  <div class="top"><ol id="top"></ol></div>
-
-  <p class="note">Homes are G-NAF addresses in ABS residential mesh blocks; people are 2021 census counts scaled by each SA1's exposed share of addresses. Farm addresses shown as smaller points. Source: NPWS Fire History (SEED), Geoscape G-NAF Aug 2026, ABS 2021.</p>
+  <details>
+    <summary>by distance, and where</summary>
+    <table id="bands"><thead><tr><th>within</th><th>homes</th><th>people</th><th>65+</th></tr></thead><tbody></tbody></table>
+    <div class="sec">most exposed suburbs</div>
+    <div class="top"><ol id="top"></ol></div>
+    <p class="note">120 years of NPWS fire history against every residential address (G-NAF) and the 2021 census. People are scaled by each area's exposed share of addresses. Farm addresses drawn smaller. <a href="https://github.com/bolat-t/spatial-analytics">Method and data notes</a>.</p>
+  </details>
 </div>
 <div id="tip"></div>
 
@@ -138,9 +141,8 @@ Promise.all([
 ]).then(([f, h, s]) => {
   fires = f; homes = h.pts; sa2 = h.sa2;
   const b100 = s.bands.find(b => b.within_m===100);
-  document.getElementById('h-homes').firstChild.textContent = fmt(b100.homes);
-  document.getElementById('h-people').firstChild.textContent = '~' + fmt(Math.round(b100.persons/1000)*1000);
-  document.getElementById('h-65').textContent = fmt(Math.round(b100.aged_65_plus/1000)*1000);
+  document.getElementById('h-homes').textContent = fmt(b100.homes);
+  document.getElementById('h-people').textContent = `about ${fmt(Math.round(b100.persons/1000)*1000)} people, ${fmt(Math.round(b100.aged_65_plus/1000)*1000)} of them over 65`;
   document.querySelector('#bands tbody').innerHTML = s.bands.map(b =>
     `<tr><td>${b.within_m===0?'footprint':b.within_m+' m'}</td><td>${fmt(b.homes)}</td><td>${fmt(b.persons)}</td><td>${fmt(b.aged_65_plus)}</td></tr>`).join('');
   document.getElementById('top').innerHTML = s.top_sa2.slice(0,10).map(t =>
