@@ -138,6 +138,12 @@ credit.attemptResize(QgsLayoutSize(400, 6, QgsUnitTypes.LayoutMillimeters))
 layout.addLayoutItem(credit)
 project.layoutManager().addLayout(layout)
 
+# Open on Greater Sydney: a headless build has no canvas, so without this the
+# project opens at whatever extent QGIS defaults to and looks empty.
+from qgis.core import QgsReferencedRectangle  # noqa: E402
+project.viewSettings().setDefaultViewExtent(QgsReferencedRectangle(QgsRectangle(255000, 6215000, 375000, 6320000), project.crs()))
+project.viewSettings().setPresetFullExtent(QgsReferencedRectangle(QgsRectangle(140000, 5900000, 900000, 6900000), project.crs()))
+
 # ---- save + export ---------------------------------------------------------------
 project.setFilePathStorage(Qgis.FilePathType.Relative) if hasattr(Qgis, "FilePathType") else None
 out = HERE / "bushfire.qgz"
