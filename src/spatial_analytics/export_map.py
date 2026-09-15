@@ -21,11 +21,9 @@ from .db import connect
 
 WEB_DATA = ROOT / "web" / "data"
 
-ERAS = [
-    ("before 2000", "season_start_year < 2000"),
-    ("2000–2018", "season_start_year between 2000 and 2018"),
-    ("2019 onward", "season_start_year >= 2019"),
-]
+# Fires are exported in five-year bins so the map can play them in order:
+# 25 dissolved polygons instead of 22,810 overlapping ones.
+BIN_YEARS = 5
 
 
 def to_wgs84(expr: str) -> str:
@@ -33,20 +31,25 @@ def to_wgs84(expr: str) -> str:
 
 
 def export_fires(con) -> None:
+    rows = con.execute(
+        f"""
+        with b as (
+            select (season_start_year // {BIN_YEARS}) * {BIN_YEARS} as bin,
+                   st_simplify(st_union_agg(st_simplify(st_buffer(geom, 20), 60)), 100) as g
+            from fire where fire_type_code = 1 and season_start_year is not null
+            group by 1
+        )
+        select bin, st_asgeojson({to_wgs84("g")}) from b order by bin
+        """
+    ).fetchall()
     features = []
-    for label, where in ERAS:
-        gj = con.execute(
-            f"""
-            select st_asgeojson({to_wgs84("st_simplify(st_union_agg(st_simplify(st_buffer(geom, 20), 60)), 80)")})
-            from fire where fire_type_code = 1 and {where}
-            """
-        ).fetchone()[0]
+    for bin_start, gj in rows:
         geom = json.loads(gj)
         _round_coords(geom["coordinates"])
-        features.append({"type": "Feature", "properties": {"era": label}, "geometry": geom})
+        features.append({"type": "Feature", "properties": {"from": int(bin_start), "to": int(bin_start) + BIN_YEARS - 1}, "geometry": geom})
     out = WEB_DATA / "fires.geojson"
     out.write_text(json.dumps({"type": "FeatureCollection", "features": features}, separators=(",", ":")))
-    print(f"  fires.geojson  {out.stat().st_size / 1e6:.1f} MB, {len(features)} eras")
+    print(f"  fires.geojson  {out.stat().st_size / 1e6:.1f} MB, {len(features)} five-year bins")
 
 
 def _round_coords(c, nd=4):
@@ -64,17 +67,25 @@ def export_homes(con) -> None:
     ).fetchall()]
     idx = {name: i for i, name in enumerate(sa2)}
 
+    # first_exposed: the season the ground within 100 m of this address first
+    # burnt -- the year the home "enters" the map when it plays.
     rows = con.execute(
         f"""
+        with first as (
+            select address_pid, min(season_start_year) as first_exposed
+            from exposure_pairs where band_m <= 100 and season_start_year is not null group by 1
+        )
         select round(st_x(p), 5), round(st_y(p), 5), min_band_m, sa2_name,
-               coalesce(last_burnt_season, 0), coalesce(fires_on_site, 0), is_primary_production
-        from (select {to_wgs84("geom")} as p, * from address_home)
+               coalesce(last_burnt_season, 0), coalesce(fires_on_site, 0), is_primary_production,
+               coalesce(first_exposed, 0)
+        from (select {to_wgs84("geom")} as p, * from address_home) h
+        left join first using (address_pid)
         where min_band_m <= 100 and (is_residential or is_primary_production)
         """
     ).fetchall()
-    pts = [[x, y, b, idx[s], ls, fo, int(f)] for x, y, b, s, ls, fo, f in rows]
+    pts = [[x, y, b, idx[s], ls, fo, int(f), fe] for x, y, b, s, ls, fo, f, fe in rows]
     out = WEB_DATA / "homes.json"
-    out.write_text(json.dumps({"sa2": sa2, "cols": ["lon", "lat", "band_m", "sa2", "last_burnt", "fires_on_site", "farm"], "pts": pts}, separators=(",", ":")))
+    out.write_text(json.dumps({"sa2": sa2, "cols": ["lon", "lat", "band_m", "sa2", "last_burnt", "fires_on_site", "farm", "first_exposed"], "pts": pts}, separators=(",", ":")))
     print(f"  homes.json     {out.stat().st_size / 1e6:.1f} MB, {len(pts):,} points")
 
 

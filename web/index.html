@@ -3,152 +3,144 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>NSW bushfire interface — homes and people</title>
+<title>NSW bushfires, 1902–2026, and who lives there now</title>
 <link rel="stylesheet" href="https://unpkg.com/maplibre-gl@4.7.1/dist/maplibre-gl.css">
 <script src="https://unpkg.com/maplibre-gl@4.7.1/dist/maplibre-gl.js"></script>
 <script src="https://unpkg.com/deck.gl@9.0.35/dist.min.js"></script>
 <style>
-  :root { --ink:#e8e2d6; --mid:#a29b8f; --bg:#171512; --panel:rgba(23,21,18,.96); --rule:rgba(232,226,214,.14); }
-  html,body { margin:0; height:100%; background:var(--bg); color:var(--ink);
-    font:14px/1.45 -apple-system, "Inter", system-ui, sans-serif; }
+  :root { --ink:#ece6da; --mid:#a29b8f; --bg:#171512; --panel:rgba(23,21,18,.94); --rule:rgba(236,230,218,.14); --accent:#ff4d3d; }
+  html,body { margin:0; height:100%; background:var(--bg); color:var(--ink); font:14px/1.45 -apple-system, "Inter", system-ui, sans-serif; }
   #map { position:absolute; inset:0; }
-  #panel { position:absolute; z-index:10; top:20px; left:20px; width:300px; max-height:calc(100% - 40px);
-    overflow:auto; background:var(--panel); backdrop-filter:blur(8px); border:1px solid var(--rule);
-    border-radius:6px; padding:22px 22px 18px; box-sizing:border-box; }
-  .big { font-size:46px; font-weight:600; letter-spacing:-.03em; line-height:1; }
-  .lede { font-size:15px; margin-top:8px; line-height:1.35; }
-  .sub { font-size:12.5px; color:var(--mid); margin-top:6px; }
-  .legend { display:grid; gap:7px; font-size:12px; margin:20px 0 4px; }
-  .legend span { display:inline-flex; align-items:center; gap:8px; cursor:pointer; user-select:none; }
+  #panel { position:absolute; z-index:10; top:20px; left:20px; width:320px; max-height:calc(100% - 40px); overflow:auto;
+    background:var(--panel); backdrop-filter:blur(8px); border:1px solid var(--rule); border-radius:6px; padding:20px 22px 16px; box-sizing:border-box; }
+  .title { font-size:13px; color:var(--mid); margin-bottom:14px; line-height:1.4; }
+  .year { font-size:54px; font-weight:600; letter-spacing:-.03em; line-height:1; font-variant-numeric:tabular-nums; }
+  .big { font-size:30px; font-weight:600; letter-spacing:-.02em; line-height:1.1; margin-top:14px; font-variant-numeric:tabular-nums; }
+  .lede { font-size:14px; margin-top:6px; line-height:1.35; color:var(--ink); }
+  .lede b { font-weight:500; }
+  .sub { font-size:12px; color:var(--mid); margin-top:4px; min-height:1.2em; }
+  .time { display:grid; grid-template-columns:auto 1fr; gap:12px; align-items:center; margin-top:18px; }
+  button.play { width:36px; height:36px; border-radius:50%; border:1px solid var(--rule); background:transparent; color:var(--ink); cursor:pointer; font-size:14px; display:grid; place-items:center; }
+  button.play:hover { border-color:var(--ink); }
+  input[type=range] { width:100%; accent-color:var(--accent); }
+  .ticks { display:flex; justify-content:space-between; font:10px ui-monospace, Menlo, monospace; color:var(--mid); margin-top:2px; grid-column:2; }
+  .legend { display:grid; gap:6px; font-size:12px; margin:18px 0 4px; }
+  .legend span { display:inline-flex; align-items:center; gap:8px; }
   .legend i { width:11px; height:11px; border-radius:2px; display:inline-block; flex:none; }
-  .legend .off { opacity:.35; }
-  details { margin-top:18px; border-top:1px solid var(--rule); padding-top:12px; }
+  details { margin-top:16px; border-top:1px solid var(--rule); padding-top:12px; }
   summary { font:11px ui-monospace, Menlo, monospace; text-transform:uppercase; letter-spacing:.08em; color:var(--mid); cursor:pointer; list-style:none; }
   summary::-webkit-details-marker { display:none; }
-  summary::before { content:"+ "; }
-  details[open] summary::before { content:"− "; }
+  summary::before { content:"+ "; } details[open] summary::before { content:"− "; }
   table { width:100%; border-collapse:collapse; font-size:12.5px; margin:12px 0 4px; font-variant-numeric:tabular-nums; }
   th { text-align:right; font-weight:500; color:var(--mid); padding:4px 0; border-bottom:1px solid var(--rule); }
   th:first-child, td:first-child { text-align:left; }
   td { text-align:right; padding:4px 0; border-bottom:1px solid var(--rule); }
   tr:last-child td { border-bottom:none; }
   .sec { font-size:11px; text-transform:uppercase; letter-spacing:.08em; color:var(--mid); margin:16px 0 2px; }
-  .top li { display:flex; justify-content:space-between; gap:8px; font-size:12.5px; padding:3px 0; border-bottom:1px solid var(--rule); }
   .top ol { margin:6px 0 0; padding:0 0 0 18px; }
-  .top b { font-weight:500; }
-  .top em { font-style:normal; color:var(--mid); white-space:nowrap; }
-  .note { font-size:11.5px; color:var(--mid); margin-top:12px; line-height:1.45; }
-  .note a { color:inherit; }
-  #tip { position:absolute; z-index:11; pointer-events:none; background:var(--panel); border:1px solid var(--rule);
-    padding:8px 10px; border-radius:4px; font-size:12px; display:none; max-width:240px; }
+  .top li { display:flex; justify-content:space-between; gap:8px; font-size:12.5px; padding:3px 0; border-bottom:1px solid var(--rule); }
+  .top b { font-weight:500; } .top em { font-style:normal; color:var(--mid); white-space:nowrap; }
+  .note { font-size:11.5px; color:var(--mid); margin-top:12px; line-height:1.45; } .note a { color:inherit; }
+  #tip { position:absolute; z-index:11; pointer-events:none; background:var(--panel); border:1px solid var(--rule); padding:8px 10px; border-radius:4px; font-size:12px; display:none; max-width:240px; }
   #tip b { font-weight:600; }
   #loading { position:absolute; inset:0; display:grid; place-items:center; color:var(--mid); font-size:13px; }
-  @media (max-width:640px) { #panel { width:calc(100% - 40px); max-height:52%; } .big { font-size:38px; } }
+  @media (max-width:640px) { #panel { width:calc(100% - 40px); max-height:55%; } .year { font-size:42px; } .big { font-size:24px; } }
 </style>
 </head>
 <body>
 <div id="map"></div>
 <div id="loading">loading…</div>
 <div id="panel">
-  <div class="big" id="h-homes">—</div>
-  <div class="lede">homes in NSW within 100 m of a mapped bushfire</div>
-  <div class="sub" id="h-people"></div>
-
-  <div class="legend" id="legend">
-    <span data-l="pt0"><i style="background:#ff4d3d"></i>home inside a fire footprint</span>
-    <span data-l="pt100"><i style="background:#ffa040"></i>home within 100 m</span>
-    <span data-l="e2019"><i style="background:rgba(255,77,61,.55)"></i>burnt 2019 onward</span>
-    <span data-l="e2000"><i style="background:rgba(255,160,64,.45)"></i>burnt 2000–2018</span>
-    <span data-l="e1900"><i style="background:rgba(160,140,120,.4)"></i>burnt before 2000</span>
+  <div class="title">Where NSW has burnt since 1902 — and who lives there now.</div>
+  <div class="year" id="yr">1902</div>
+  <div class="big" id="n">0</div>
+  <div class="lede">of today's homes sit within 100 m of ground that had burnt by then</div>
+  <div class="time">
+    <button class="play" id="play" title="play">▶</button>
+    <input type="range" id="slider" min="1902" max="2026" value="1902" step="1">
+    <div class="ticks"><span>1902</span><span>1950</span><span>2000</span><span>2026</span></div>
   </div>
-
+  <div class="legend">
+    <span><i style="background:rgba(255,77,61,.7)"></i>burnt in the last 5 years</span>
+    <span><i style="background:rgba(255,160,64,.5)"></i>burnt 5–30 years ago</span>
+    <span><i style="background:rgba(160,140,120,.45)"></i>burnt longer ago</span>
+    <span><i style="background:#ff4d3d;border-radius:50%"></i>home inside a fire footprint</span>
+    <span><i style="background:#ffa040;border-radius:50%"></i>home within 100 m of one</span>
+  </div>
   <details>
-    <summary>by distance, and where</summary>
+    <summary>today, by distance and suburb</summary>
     <table id="bands"><thead><tr><th>within</th><th>homes</th><th>people</th><th>65+</th></tr></thead><tbody></tbody></table>
     <div class="sec">most exposed suburbs</div>
     <div class="top"><ol id="top"></ol></div>
-    <p class="note">120 years of NPWS fire history against every residential address (G-NAF) and the 2021 census. People are scaled by each area's exposed share of addresses. Farm addresses drawn smaller. <a href="https://github.com/bolat-t/spatial-analytics">Method and data notes</a>.</p>
+    <p class="note">120 years of NPWS fire history (wildfires only) against every residential address in G-NAF and the 2021 census. A home appears the year the ground within 100 m of it first burnt; the homes are today's, not the ones that stood then. People are scaled by each area's exposed share of addresses. <a href="https://github.com/bolat-t/spatial-analytics">Method and data notes</a>.</p>
   </details>
 </div>
 <div id="tip"></div>
 
 <script>
-const {DeckGL, ScatterplotLayer, GeoJsonLayer, MapboxOverlay} = deck;
+const {ScatterplotLayer, GeoJsonLayer, MapboxOverlay, DataFilterExtension} = deck;
 const fmt = n => n.toLocaleString('en-AU');
-const on = {pt0:true, pt100:true, e2019:true, e2000:true, e1900:true};
-const ERA = {'2019 onward':'e2019','2000–2018':'e2000','before 2000':'e1900'};
-const ERA_FILL = {'2019 onward':[255,77,61,110],'2000–2018':[255,160,64,80],'before 2000':[160,140,120,70]};
+const Y0 = 1902, Y1 = 2026;
+let year = Y0, playing = false, timer = null;
 
-// #lon,lat,zoom in the URL sets the view, so a view can be linked to.
 const hash = location.hash.slice(1).split(',').map(Number);
-const view = hash.length === 3 && hash.every(Number.isFinite)
-  ? {center:[hash[0], hash[1]], zoom:hash[2]} : {center:[150.55,-33.75], zoom:8.2};
-const map = new maplibregl.Map({
-  container:'map',
-  style:'https://basemaps.cartocdn.com/gl/dark-matter-gl-style/style.json',
-  ...view, minZoom:5, maxZoom:16, attributionControl:true
-});
-map.on('moveend', () => {
-  const c = map.getCenter();
-  history.replaceState(null, '', `#${c.lng.toFixed(4)},${c.lat.toFixed(4)},${map.getZoom().toFixed(2)}`);
-});
+const view = hash.length === 3 && hash.every(Number.isFinite) ? {center:[hash[0], hash[1]], zoom:hash[2]} : {center:[150.55,-33.75], zoom:8.2};
+const map = new maplibregl.Map({ container:'map', style:'https://basemaps.cartocdn.com/gl/dark-matter-gl-style/style.json', ...view, minZoom:5, maxZoom:16, attributionControl:true });
 map.addControl(new maplibregl.NavigationControl({showCompass:false}), 'top-right');
+map.on('moveend', () => { const c = map.getCenter(); history.replaceState(null, '', `#${c.lng.toFixed(4)},${c.lat.toFixed(4)},${map.getZoom().toFixed(2)}`); });
 const overlay = new MapboxOverlay({interleaved:false, layers:[]});
 map.addControl(overlay);
 
-let fires, homes, sa2;
+let fires, homes, sa2, firstYears = [];
 const tip = document.getElementById('tip');
 
+function fireColor(f){
+  const age = year - f.properties.from;
+  return age <= 5 ? [255,77,61,180] : age <= 30 ? [255,160,64,128] : [160,140,120,115];
+}
 function layers(){
   return [
-    new GeoJsonLayer({
-      id:'fires',
-      data:{type:'FeatureCollection', features: fires.features.filter(f => on[ERA[f.properties.era]])},
-      stroked:false, filled:true,
-      getFillColor: f => ERA_FILL[f.properties.era],
-    }),
-    new ScatterplotLayer({
-      id:'homes', data:homes,
-      getPosition: d => [d[0], d[1]],
-      getFillColor: d => d[2]===0 ? [255,77,61] : [255,160,64],
-      getRadius: d => d[6] ? 14 : 22, radiusMinPixels:1.2, radiusMaxPixels:6,
-      radiusUnits:'meters', opacity:.85, pickable:true,
-      getFilterValue: d => (d[2]===0 ? on.pt0 : on.pt100) ? 1 : 0,
-      filterRange:[1,1],
-      extensions:[new deck.DataFilterExtension({filterSize:1})],
-      updateTriggers:{getFilterValue:[on.pt0,on.pt100]},
+    new GeoJsonLayer({ id:'fires', data:{type:'FeatureCollection', features: fires.features.filter(f => f.properties.from <= year)},
+      stroked:false, filled:true, getFillColor: fireColor, updateTriggers:{getFillColor:[year]}, transitions:{getFillColor:600} }),
+    new ScatterplotLayer({ id:'homes', data:homes,
+      getPosition: d => [d[0], d[1]], getFillColor: d => d[2]===0 ? [255,77,61] : [255,160,64],
+      getRadius: d => d[6] ? 14 : 22, radiusMinPixels:1.3, radiusMaxPixels:6, radiusUnits:'meters', opacity:.9, pickable:true,
+      getFilterValue: d => d[7], filterRange:[0, year], extensions:[new DataFilterExtension({filterSize:1})],
       onHover: ({object, x, y}) => {
         if(!object){ tip.style.display='none'; return; }
-        const [, , band, s, last, n, farm] = object;
+        const [, , band, s, last, n, farm, first] = object;
         tip.style.display='block'; tip.style.left=(x+14)+'px'; tip.style.top=(y+14)+'px';
-        tip.innerHTML = `<b>${sa2[s]}</b><br>${farm?'farm address':'home'} · ${band===0?'inside a fire footprint':'within 100 m of one'}`
-          + (n ? `<br>burnt over ${n===1?'once':n+' times'}, last ${last}–${String(last+1).slice(2)}` : '');
-      }
-    })
+        tip.innerHTML = `<b>${sa2[s]}</b><br>${farm?'farm address':'home'} · ${band===0?'inside a fire footprint':'within 100 m of one'}<br>nearby ground first burnt ${first}–${String(first+1).slice(2)}` + (n ? `; burnt over ${n===1?'once':n+' times'}, last ${last}–${String(last+1).slice(2)}` : '');
+      } })
   ];
 }
-function render(){ overlay.setProps({layers: layers()}); }
+function countBy(y){ let lo=0, hi=firstYears.length; while(lo<hi){ const m=(lo+hi)>>1; if(firstYears[m]<=y) lo=m+1; else hi=m; } return lo; }
+function setYear(y, fromSlider){
+  year = Math.max(Y0, Math.min(Y1, y));
+  document.getElementById('yr').textContent = year;
+  document.getElementById('n').textContent = fmt(countBy(year));
+  if(!fromSlider) document.getElementById('slider').value = year;
+  overlay.setProps({layers: layers()});
+}
+function play(){
+  playing = !playing; document.getElementById('play').textContent = playing ? '❚❚' : '▶';
+  if(playing){ if(year >= Y1) setYear(Y0); timer = setInterval(() => { if(year >= Y1){ play(); return; } setYear(year + 1); }, 110); }
+  else clearInterval(timer);
+}
+document.getElementById('play').onclick = play;
+document.getElementById('slider').oninput = e => { if(playing) play(); setYear(+e.target.value, true); };
 
-document.getElementById('legend').addEventListener('click', e => {
-  const s = e.target.closest('span[data-l]'); if(!s) return;
-  on[s.dataset.l] = !on[s.dataset.l]; s.classList.toggle('off', !on[s.dataset.l]); render();
-});
-
+const V = '?v=20260915';   // bump when data/ changes, or returning visitors get the old files
 Promise.all([
-  fetch('data/fires.geojson').then(r=>r.json()),
-  fetch('data/homes.json').then(r=>r.json()),
-  fetch('data/summary.json').then(r=>r.json()),
+  fetch('data/fires.geojson'+V).then(r=>r.json()), fetch('data/homes.json'+V).then(r=>r.json()), fetch('data/summary.json'+V).then(r=>r.json()),
 ]).then(([f, h, s]) => {
   fires = f; homes = h.pts; sa2 = h.sa2;
-  const b100 = s.bands.find(b => b.within_m===100);
-  document.getElementById('h-homes').textContent = fmt(b100.homes);
-  document.getElementById('h-people').textContent = `about ${fmt(Math.round(b100.persons/1000)*1000)} people, ${fmt(Math.round(b100.aged_65_plus/1000)*1000)} of them over 65`;
-  document.querySelector('#bands tbody').innerHTML = s.bands.map(b =>
-    `<tr><td>${b.within_m===0?'footprint':b.within_m+' m'}</td><td>${fmt(b.homes)}</td><td>${fmt(b.persons)}</td><td>${fmt(b.aged_65_plus)}</td></tr>`).join('');
-  document.getElementById('top').innerHTML = s.top_sa2.slice(0,10).map(t =>
-    `<li><b>${t.sa2}</b><em>${fmt(t.homes)} homes · ${t.pct_of_homes}%</em></li>`).join('');
+  firstYears = homes.filter(p => !p[6]).map(p => p[7]).sort((a,b)=>a-b);   // homes only, not farms
+  document.querySelector('#bands tbody').innerHTML = s.bands.map(b => `<tr><td>${b.within_m===0?'footprint':b.within_m+' m'}</td><td>${fmt(b.homes)}</td><td>${fmt(b.persons)}</td><td>${fmt(b.aged_65_plus)}</td></tr>`).join('');
+  document.getElementById('top').innerHTML = s.top_sa2.slice(0,8).map(t => `<li><b>${t.sa2}</b><em>${fmt(t.homes)} homes · ${t.pct_of_homes}%</em></li>`).join('');
   document.getElementById('loading').remove();
-  render();
+  setYear(Y1);
+  setTimeout(() => { setYear(Y0); play(); }, 1200);   // show the whole picture, then play it from the start
 });
 </script>
 </body>
