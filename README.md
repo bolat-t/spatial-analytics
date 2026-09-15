@@ -26,6 +26,7 @@ Pipeline runs end to end, map included. Next: portfolio write-up, GitHub Pages d
 | ABS mesh blocks + census → `census_sa1` | ✅ `ingest_abs` |
 | Dwelling-weighted overlay → `sa1_exposure` | ✅ `build_population` |
 | deck.gl map | ✅ `export_map` → `web/` — serve with `python3 -m http.server --directory web` |
+| GIS deliverable | ✅ `export_gis` → GeoPackage (4 layers); `gis/build_project.py` → QGIS project + A3 layout |
 
 ## First results
 
@@ -87,6 +88,29 @@ are reported in their own column rather than silently included or dropped.
 | NPWS Fire History (wildfires + prescribed burns) | [SEED](https://datasets.seed.nsw.gov.au/dataset/fire-history-wildfires-and-prescribed-burns-1e8b6) — ArcGIS MapServer | 38,092 polygons, **GDA94** (EPSG:4283) |
 | G-NAF, Aug 2026, GDA2020 | [data.gov.au](https://data.gov.au/data/dataset/geocoded-national-address-file-g-naf) | 1.7 GB zip of pipe-separated fragments, **GDA2020** (EPSG:7844) |
 | SA1 boundaries + census | ABS ASGS 2021 | polygons + age/income tables |
+
+## Open it in QGIS or ArcGIS Pro
+
+![Greater Sydney: burnt land by era, today's homes within 100 m, and the share of homes exposed by SA1](gis/bushfire-sydney.png)
+
+The results are also a plain GIS dataset. `bushfire.gpkg` (305 MB, in the
+[release assets](https://github.com/bolat-t/spatial-analytics/releases)) holds
+four layers in EPSG:7856:
+
+| Layer | What it is |
+|---|---|
+| `fires` | every mapped wildfire, geometry repaired, season decoded — 22,809 polygons |
+| `burnt_5yr` | the dissolved burnt extent in five-year bins — what the web map plays |
+| `homes_100m` | today's homes and farm addresses within 100 m of burnt land, with the year the nearby ground first burnt |
+| `sa1_exposure` | ABS SA1 polygons with the count and share of homes exposed at 0 / 100 / 500 / 1000 m, and people scaled by that share |
+
+Download the zip into `gis/`, unzip, and open `gis/bushfire.qgz` — styled layers
+and a print layout for Greater Sydney. ArcGIS Pro reads the GeoPackage directly
+(*Add Data → Database*). The project was built headlessly with PyQGIS
+(`gis/build_project.py`, environment in `gis/qgis-env.sh`); the same operations
+the pipeline does in DuckDB — repair, reproject, buffer, dissolve, spatial join —
+have desktop equivalents in either tool, they just take minutes rather than
+seconds at five million points.
 
 ## Datums, and why they get their own section
 
@@ -161,4 +185,6 @@ uv run python -m spatial_analytics.build_exposure    # addresses x fires x bands
 uv run python -m spatial_analytics.ingest_abs        # mesh blocks + census
 uv run python -m spatial_analytics.build_population  # people, by age, by SA1
 uv run python -m spatial_analytics.export_map        # web/data/*.json for the map
+uv run python -m spatial_analytics.export_gis        # data/processed/bushfire.gpkg
+source gis/qgis-env.sh && "$QGIS_PY" gis/build_project.py   # gis/bushfire.qgz + the layout PNG
 ```

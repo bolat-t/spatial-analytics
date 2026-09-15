@@ -18,3 +18,4 @@ wheels/
 .DS_Store
 .idea/
 .vscode/
+gis/bushfire.gpkg
